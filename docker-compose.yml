@@ -1,0 +1,138 @@
+version: "3.4"
+
+x-base: &base
+    env_file: backend/.env
+    build: 
+      context : backend/
+      dockerfile: Dockerfile
+      #target: local
+      args: 
+       - SCENARIO=local 
+       - PYTHON_VBASE=3.7.4-slim-buster
+       - PYTHON_VFINAL=3.7.4-slim-buster
+
+services:
+  db:
+    container_name: postgres
+    image: postgres:alpine
+    volumes:
+      - dbdata:/pgdata
+    env_file: db/env  
+  
+  app:
+    <<: *base
+    container_name: app
+    entrypoint: ['entrypoints/start_server.sh']
+    volumes:
+      - ./backend:/backend
+      - ./backend/static:/backend/static  # <-- bind the static volume
+      - ./backend/media:/backend/media  # <-- bind the media volume
+    healthcheck:
+      test: curl --fail http://localhost:8000/api/ || exit
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    depends_on: 
+      - db 
+    links:
+      - redis
+    expose:
+      - "8000"
+
+  celery:
+    <<: *base
+    container_name: celery
+    entrypoint: ['entrypoints/start_worker.sh']
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - app
+      - redis
+    links:
+      - app:app
+      - redis:redis
+  
+  flower:
+    <<: *base
+    container_name: flower
+    entrypoint: ['entrypoints/start_task_monitor.sh']
+    volumes:
+      - ./backend:/backend
+    depends_on:
+      - app
+      - redis
+    links:
+      - app:app
+      - redis:redis
+    expose:
+      - "8888"
+
+
+  channels:
+    <<: *base
+    container_name: channels
+    entrypoint: ['entrypoints/start_async_server.sh']
+    volumes:
+      - ./backend:/backend
+    healthcheck:
+      test: 'curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Host: localhost" -H "Origin: http://localhost/ws/test" -H "Sec-WebSocket-Key: IRhw449z7G0Mov9CahJ+Ow==" -H "Sec-WebSocket-Version: 13" --fail http://localhost/ws/test || exit'
+      interval: 1m
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - db
+      - app
+      - redis
+    links:
+      - app:app
+      - redis:redis
+      - db:db
+    expose:
+      - "9000"
+    
+  redis:
+    image: redis:alpine
+    container_name: redis
+  
+  frontend:
+    build:
+      network: host 
+      context : frontend/
+      dockerfile: Dockerfile
+    container_name: react
+    entrypoint: ['./entrypoint.sh']
+    volumes:
+      - ./frontend/:/frontend
+      - modules:/frontend/node_modules
+    env_file: frontend/.env
+    ports:
+      - '3000:3000'
+    links:
+      - app:app
+      - proxy:proxy
+    depends_on:
+      - app
+  
+  proxy:
+    container_name: proxy_nginx
+    image: nginx:alpine
+    volumes:
+      - ./proxy/:/etc/nginx/conf.d
+      - ./backend/static:/backend/static  # <-- bind the static volume
+      - ./backend/media:/backend/media  # <-- bind the media volume
+      - ./frontend/build:/var/www/frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    links:
+      - app:app
+      - channels:channels
+    depends_on:
+      - app
+      - channels
+volumes:
+  dbdata:
+  backend:
+  modules:
+  static_volume:
+  media_volume:

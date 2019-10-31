@@ -1,0 +1,96 @@
+ARG PYTHON_VBASE=3.6.8-alpine
+ARG PYTHON_VFINAL=3.6.8-alpine
+FROM python:$PYTHON_VBASE as builder
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+
+
+# make work folder on container
+
+######### Install dependences for build python packages
+
+RUN apk update \
+  # psycopg2 dependencies
+  && apk add --virtual build-deps gcc python3-dev musl-dev \
+  && apk add postgresql-dev \
+  # Pillow dependencies
+  && apk add jpeg-dev zlib-dev freetype-dev lcms2-dev openjpeg-dev tiff-dev tk-dev tcl-dev \
+  # CFFI dependencies
+  && apk add libffi-dev py-cffi \
+  # Translations dependencies
+  && apk add gettext \
+  # https://docs.djangoproject.com/en/dev/ref/django-admin/#dbshell
+&& apk add postgresql-client
+
+ARG SCENARIO=base
+RUN mkdir /install
+WORKDIR /install
+COPY requirements/$SCENARIO.txt /
+RUN pip install --upgrade pip \
+##    && pip wheel --no-cache-dir --no-deps --wheel-dir /wheels -r $SCENARIO.txt
+    && pip install --install-option="--prefix=/install" -r /$SCENARIO.txt
+
+
+#Add configs to the service
+#ADD ../config/ /config
+
+
+#FROM builder as dependences
+#ARG SCENARIO=requirements/base.txt
+
+#RUN addgroup -S addgroup
+
+#RUN mkdir -p /webapp
+#WORKDIR /webapp
+#ADD ./requirements /webapp/requirements
+#RUN pip install --upgrade pip \
+#    && pip install -r $SCENARIO
+
+
+## If you want to create additional folders
+#    && mkdir -p /webapp/static \
+#    && mkdir -p /webapp/media
+FROM python:$PYTHON_VFINAL as base
+ARG SCENARIO=base
+COPY --from=builder /install /usr/local
+RUN apk --no-cache add libpq curl
+#COPY --from=builder $SCENARIO.txt .
+#RUN pip install --no-cache /wheels/*
+RUN addgroup -S app && adduser -S -G app app
+RUN mkdir -p /webapp && chown -R app:app /webapp
+WORKDIR /webapp
+ADD . /webapp
+# execute preparatiosn previous to
+#RUN python manage.py collectstatic --no-input
+ENV PORT 8000
+EXPOSE $PORT
+USER app
+#HEALTHCHECK CMD curl --fail http://localhost:$PORT || exit
+#ENTRYPOINT [ "entrypoint.sh" ]
+#CMD ["gunicorn", "--bind", ":8000", "webapp.wsgi:application"]
+
+###############################################
+FROM python:$PYTHON_VFINAL as local
+ARG SCENARIO=local
+COPY --from=builder /install /usr/local
+RUN apk --no-cache add libpq
+#COPY --from=builder $SCENARIO.txt .
+#RUN pip install --no-cache /wheels/*
+RUN addgroup -S app && adduser -S -G app app
+RUN mkdir -p /webapp && chown -R app:app /webapp
+WORKDIR /webapp
+ADD . /webapp
+ENV PORT 8000
+EXPOSE $PORT
+USER app
+#HEALTHCHECK CMD curl --fail http://localhost:$PORT || exit
+#ENTRYPOINT [ "entrypoint.sh" ]
+#CMD ["gunicorn", "--bind", ":8000", "webapp.wsgi:application"]
+
+#RUN pip install -r $SCENARIO && rm -rf /root/.cache
+############### execute preparatiosn previous to
+#RUN python manage.py collectstatic --no-input
+#EXPOSE $PORT
+###HEALTHCHECK CMD curl --fail http://localhost:$PORT || exit
+#CMD ["gunicorn", "--bind", ":8000", "webapp.wsgi:application"]

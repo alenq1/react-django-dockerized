@@ -1,0 +1,4 @@
+static/admin
+static/rest_framework
+db.sqlite
+celerybeat*
