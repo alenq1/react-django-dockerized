@@ -1,4 +1,5 @@
 static/admin
 static/rest_framework
+staticfiles/
 db.sqlite
 celerybeat*
