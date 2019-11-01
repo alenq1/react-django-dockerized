@@ -1,9 +1,6 @@
 #!/bin/sh
 
 
-
-
-
 case $SCENARIO in
     "local")
         ./wait-for-it.sh db:5432 -- python manage.py migrate

@@ -49,14 +49,13 @@ def get_page(url, scrap=True):
 
 def get_site_content(to_scrap, keyword):
 
-    
     try:
         
-        selection = to_scrap.find_all('a', href=re.compile(keyword))[1:6]
+        selection = to_scrap.find_all('a', href=re.compile(keyword))
         
         response = [{'url': content.get(
             'href'), 'title': " ".join(content.getText().split())} for content in selection]
-        # filter_title = " ".join(content.getText().split()) fo
+        # filter_title = " ".join(content.getText().split())
         # print(filter_title, "Filter title")
         return response
 

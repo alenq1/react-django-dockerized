@@ -9,8 +9,8 @@ export const exampleSelector = createSelector(
 
     (data) => {
         
-            //console.log("OMITO EL SORT")
-            //console.log(data[0].cryptoData, "ESTRUCTURA DENTRO DE CRYTPO DATA")
+            //console.log(data, "data")
+            
             return data
         
     }

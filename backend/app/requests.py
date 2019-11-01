@@ -18,7 +18,7 @@ import concurrent.futures
 def get_api_data():
 
     '''
-    This function make api requests and send results onto websocket channel 
+    This function make concurrent api requests , just add a field and url and you can make multiple requests
     '''
     
     sites_to_get_data = [{'page': 'examplePage', 'url':'https://jsonplaceholder.typicode.com/posts'},
