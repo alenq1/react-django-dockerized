@@ -86,7 +86,6 @@
   - A button link to the django admin page for manage your models(IF you want to)
   
 
-
   ## Stand Alone (Buscar Nombre)
   - TODO
   - []
@@ -95,10 +94,8 @@
 
 
   ## TODO
-  - [] improve UI display (it really basic)
+  - [] improve UI display 
   - [] add more schedule tasks and delayed tasks
   - [] define model for saving data from scheduled taks
-  - [] make some manipulation in received data and displays on frontend
-  - [] add "x" on the base service for define extension
   - [] set enviroment variables deploy more flexible
   
