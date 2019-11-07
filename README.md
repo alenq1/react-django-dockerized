@@ -71,7 +71,20 @@
     export DOCKER_CLIENT_TIMEOUT=120
     export COMPOSE_HTTP_TIMEOUT=120
 
-  Once all containers are up and running just check the services status on the home page site http://localhost:3000/, and now you can start with your new project
+  
+# Services Check
+
+  Once all containers are up and running just check the services status on the home page site http://localhost:3000/, and now you can see the service check page
+
+
+  This is the initial page for check the services which our app will interact and do the following checks
+
+  - Backend root api endpoint
+  - Make a request to api backend which makes another request to external api
+  - Websocket client send a PING message to the server and awaits for PONG response
+  - A button link to the celery flower monitor for scheduled tasks running
+  - A button link to the django admin page for manage your models(IF you want to)
+  
 
 
   ## Stand Alone (Buscar Nombre)

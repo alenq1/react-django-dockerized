@@ -21,8 +21,8 @@ def get_api_data():
     This function make concurrent api requests , just add a field and url and you can make multiple requests
     '''
     
-    sites_to_get_data = [{'page': 'examplePage', 'url':'https://jsonplaceholder.typicode.com/posts'},
-                        
+    sites_to_get_data = [{'page': 'examplePage', 'url':'https://api.publicapis.org/entries'},
+                        #{'page': 'otherExample', 'url':'https://jsonplaceholder.typicode.com/posts'},
                         ]
     
     #SET FUCNTIONS FOR EXECUTING CONCURRENT REQUESTS
@@ -39,9 +39,3 @@ def get_api_data():
     data_to_client = [responses.json() for responses in get_all_sites(only_sites)]
 
     return data_to_client
-    
-    
-
-    
-
-

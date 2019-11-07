@@ -17,11 +17,13 @@ import os
 from django.contrib import admin
 from django.urls import path, include, re_path
 from backend.apiroutes import router
+from app.views import TestApi
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/test', TestApi.as_view(), name='test'),
     
 ]
 

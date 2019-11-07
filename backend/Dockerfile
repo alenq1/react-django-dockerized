@@ -62,7 +62,7 @@ COPY --from=builder /venv /venv
 
 #Create a new user for execute the container instead root for security purposes
 RUN groupadd app && useradd -g app app 
-RUN mkdir -p /backend  /backend/media /backend/static
+RUN mkdir -p /backend  && mkdir -p /backend/media /backend/static
 WORKDIR /backend
 ADD . /backend
 

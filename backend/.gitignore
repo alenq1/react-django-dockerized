@@ -3,3 +3,4 @@ static/rest_framework
 staticfiles/
 db.sqlite
 celerybeat*
+*.pyc

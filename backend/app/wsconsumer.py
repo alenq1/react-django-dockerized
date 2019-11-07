@@ -2,6 +2,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer, AsyncJsonWebsocketConsumer
 import asyncio
 import json
+import time
 
 
 class TestConsumer(AsyncJsonWebsocketConsumer):
@@ -48,17 +49,17 @@ class TestConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content, **kwargs):
         #text_data_json = json.loads(text_data)
         ##message = text_data_json['message']
-        resp = content.get('message')
-        print(resp, "message from client")
+        #resp = content.get('message')
+        #print(resp, "message from client")
 
         ## Send message to room group
-        # await self.channel_layer.group_send(
-        #     self.room_group_name,
-        #     {
-        #         'type': 'send.broadcast',
-        #         'to_send': 'OK'
-        #     }
-        # )
+        await self.channel_layer.group_send(
+             self.room_group_name,
+             {
+                 'type': 'send.broadcast',
+                 'reply': 'PONG'
+             }
+         )
 
     # Receive message from room group
     async def send_broadcast(self, event):
@@ -66,7 +67,8 @@ class TestConsumer(AsyncJsonWebsocketConsumer):
         #to_send = event['to_send']
         to_send = event
 
-        # Send message to WebSocket
+        # Wait 3 seconds and Send message to WebSocket 
+        time.sleep(3)
         await self.send_json({
             'message': to_send
         })

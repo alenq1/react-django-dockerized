@@ -168,6 +168,16 @@ if os.environ['HEROKU_DEPLOY'] == 'Y':
 ######END HEROKU CONFIGS
 
 
+### REDIS CACHE
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': (os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379')),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 # CELERY SETTINGS
 

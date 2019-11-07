@@ -1,28 +1,45 @@
 import React, {useEffect, useState} from 'react'
+import {connect} from 'react-redux'
+import fetchBackendApi from '../actions/fetchBackendApi'
+import {exampleSelector} from '../selectors/exampleSelector'
+import {sources} from '../services/dataSources'
+import Result from '../components/Result'
+import { Card, Spinner} from 'react-bootstrap'
 
-const Home = () => {
 
+const Home = ({fetchBackendApi, result, jsondata}) => {
+
+    
     const [websocket, setWsStatus] = useState('checking...')
-    const [api, setApiStatus] = useState('checking...')
+    const [apiEndpoint, SetEndpointStatus] = useState('checking...')
     
     
     const checkWebsocket = (wsUrl) => {
         
         const check = new WebSocket(wsUrl)
 
-        check.onopen = function (event) {setWsStatus('connected')}
-        check.onmessage = function (event) {setWsStatus('communicating')}
+        check.onopen = function (event) 
+        {
+            setWsStatus('connected, Sending PING');
+            check.send(JSON.stringify({ message: 'PING' }))
+        }
+        
+        check.onmessage = function (event) 
+        {
+            setWsStatus(`Receiving ${JSON.parse(event.data).message.reply}`)
+            
+        }
         check.onclose = function (event) {setWsStatus('closed')}
         check.onerror = function (event) {setWsStatus('error')}
         
         
     }
 
-    const checkApi = (Url) => {
+    const checkApiEndpoint = (Url) => {
 
         fetch(Url)
-        .then((response) => {setApiStatus(response.statusText)})
-        .catch((error) => {setApiStatus('error')})
+        .then((response) => {SetEndpointStatus(response.statusText)})
+        .catch((error) => {SetEndpointStatus('error')})
 
 
     }
@@ -30,42 +47,107 @@ const Home = () => {
 
     useEffect(() => {
         
-        checkWebsocket('ws://localhost/ws/test')
-        checkApi('http://localhost/api/')
+        checkWebsocket(sources.WSocket)
+        checkApiEndpoint(sources.backEndpoint)
+        
 
     }, [])
 
 
     return (
-        <div className='mt-5 ml-5'>
+        <div className='m-5'>
             <h1 >Home Page</h1>
-            <h3>Services Check</h3>
-            <li className="mt-5">Api Endpoint State {api === 'OK' ? 
-                    <ul className='text-success'>{api}</ul> 
-                    : 
-                    <ul className='text-danger'>{api}</ul> }
-            <ul><a href='http://localhost/api/'>check root api endpoint</a></ul>
-            </li>
+            <Card>
+                <Card.Header>Services Check</Card.Header>
+                <Card.Body>
+                <li className="mt-2">Api Endpoint State 
+                {   apiEndpoint === 'OK' ? 
+                        <ul className='text-success'>{apiEndpoint}</ul> 
+                        : 
+                        <ul className='text-danger'>{apiEndpoint}</ul> 
+                }
+            
+                <li className="mt-2">Backend Api request
+                    <ul>
+                    <button type="button" className="btn btn-primary mt-2"
+                            onClick={() => fetchBackendApi(sources.checkApiUrl)}>
+                        check Request        
+                    </button>    
+                    {    
+                        !result.data  &&
+                        <></>
+                    
+                    }        
+                    
+                    {    
+                        result.loading === true &&
+                        <div className='mt-3'>
+                        <Card.Header>
+                            <Spinner animation="border" role="status" variant='dark'/>
+                            Loading
+                        </Card.Header>
+                        </div>
+                    }
+                
+                    {
+                        (result.data && result.data.length > 0) &&
+
+                        <Result type='Success' message={jsondata}/>
+                                    
+                        
+                    }
+                    
+                    {   (result.error && result.error.message) &&
+
+                        <Result type='Error' message={result.error.message}/>
+                    }
+
+            
+                    </ul>
+                </li>     
+            
+                </li>
             
             
-            <li>Websocket state {websocket === 'connected' ? 
+                <li>Websocket state 
+                    {
+                    websocket === 'connected' ||  websocket === 'Receiving PONG' ? 
                     <ul className='text-success'>{websocket}</ul> 
-                    : 
-                    <ul className='text-danger'>{websocket}</ul> }
-            </li>
+                        : 
+                    <ul className='text-danger'>{websocket}</ul> 
+                    }
+                </li>
             
-            <li>
-            Celery tasks
-            <ul><a href='http://localhost/flower/'>check tasks</a></ul>
-            </li>
+                <li>
+                Scheduled tasks
+                    <ul>
+                        <a className="btn btn-primary mt-2" role="button" href={sources.taskMonitor}>
+                            check tasks
+                        </a>
+                    </ul>
+                </li>
 
-            <li>
-            Django admin Page
-            <ul><a href='http://localhost/admin/'>go to page</a></ul>
-            </li>
-
+                <li>
+                Django admin Page
+                    <ul>
+                        <a className="btn btn-primary mt-2" role="button" href={sources.djangoAdmin}>
+                            go to page
+                        </a>
+                    </ul>
+                </li>
+                </Card.Body>
+            </Card>
         </div>
     )
 }
 
-export default Home
+
+const mapStateToProps = state => {
+    return {
+      result: state.example,
+      jsondata: exampleSelector(state)
+    }
+  }
+  
+
+export default connect(mapStateToProps, { fetchBackendApi })(Home)

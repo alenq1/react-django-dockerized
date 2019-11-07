@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect'
 
-const rawData = state => state.example && state.example.dataTest
+const rawData = state => state.example && state.example.data
 
 export const exampleSelector = createSelector(
 
@@ -11,7 +11,7 @@ export const exampleSelector = createSelector(
         
             //console.log(data, "data")
             
-            return data
+            return JSON.stringify(data, null, 2)
         
     }
 

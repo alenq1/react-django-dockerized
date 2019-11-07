@@ -17,10 +17,10 @@ def debug_task(self):
 # SETTINGS FOR PERIODIC TASKS SCHEDULE
 
 celery_app.conf.beat_schedule = {
-     # Executes every 5 seconds to requests apis
-#     'SCRAP_API_DATA': {
-#         'task': 'app.scraper.get_api_data',
-#         'schedule': 5,
-#         'args': (),
-#     },
+     # Executes every minute the defined task
+     'TEST_TASK': {
+         'task': 'app.tasks.test_task',
+         'schedule': crontab(minute='*/1'),
+         'args': (),
+     },
 }
