@@ -82,8 +82,13 @@
   - Backend root api endpoint
   - Make a request to api backend which makes another request to external api
   - Websocket client send a PING message to the server and awaits for PONG response
-  - A button link to the celery flower monitor for scheduled tasks running
-  - A button link to the django admin page for manage your models(IF you want to)
+  - A button link to the celery flower monitor for scheduled tasks running (see backend/backend/celery.py to disable/enable)
+  - A button link to the django admin page for manage your models
+  
+  If you want to use a database, need create superuser on app container
+
+    docker-compose exec app python manage.py createsuperuser
+ 
   
 
   ## Stand Alone (Buscar Nombre)
@@ -98,4 +103,5 @@
   - [] add more schedule tasks and delayed tasks
   - [] define model for saving data from scheduled taks
   - [] set enviroment variables deploy more flexible
+  - [] use redis-commander for managing redis service
   

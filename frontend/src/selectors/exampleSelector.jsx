@@ -10,7 +10,7 @@ export const exampleSelector = createSelector(
     (data) => {
         
             //console.log(data, "data")
-            
+            // Format the data result to json string special format to display on the home page
             return JSON.stringify(data, null, 2)
         
     }

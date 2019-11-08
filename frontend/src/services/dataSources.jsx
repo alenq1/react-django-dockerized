@@ -2,9 +2,9 @@ const myHost = 'http://localhost'
 
 export const sources = {
 
-    WSocket : 'ws://localhost/ws/test',
-    checkApiUrl : `${myHost}/api/test`,
+    WSocket : 'ws://localhost/ws/test/',
     backEndpoint : `${myHost}/api/`,
+    checkApiUrl : `${myHost}/api/test`,    
     taskMonitor : `${myHost}/flower/`,
     djangoAdmin : `${myHost}/admin/`,
 }
